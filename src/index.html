@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>SSE Crypto Dashboard</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    background:#111;
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.container{
+    width:420px;
+    background:#1b1b1b;
+    border:1px solid #333;
+    border-radius:16px;
+    padding:28px;
+    box-shadow:0 15px 40px rgba(0,0,0,.45);
+}
+
+h1{
+    text-align:center;
+    margin-bottom:24px;
+    color:#ff6b35;
+}
+
+.card{
+    background:#262626;
+    padding:18px;
+    border-radius:10px;
+    margin-bottom:18px;
+}
+
+.label{
+    color:#bbb;
+    font-size:14px;
+}
+
+.price{
+    margin-top:8px;
+    font-size:2rem;
+    font-weight:bold;
+    color:#ffb347;
+}
+
+.updated{
+    margin-top:24px;
+    text-align:center;
+    color:#999;
+    font-size:14px;
+}
+
+.status{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    margin-bottom:20px;
+    color:#ff4d4d;
+}
+
+.dot{
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:#ff3b30;
+    animation:pulse 1s infinite;
+}
+
+@keyframes pulse{
+    0%{transform:scale(1);opacity:1;}
+    50%{transform:scale(1.5);opacity:.4;}
+    100%{transform:scale(1);opacity:1;}
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Live Crypto Prices</h1>
+
+    <div class="status">
+        <div class="dot"></div>
+        <span>Connected via Server-Sent Events</span>
+    </div>
+
+    <div class="card">
+        <div class="label">Bitcoin</div>
+        <div class="price" id="btc">$0</div>
+    </div>
+
+    <div class="card">
+        <div class="label">Ethereum</div>
+        <div class="price" id="eth">$0</div>
+    </div>
+
+    <div class="updated" id="time">
+        Waiting for data...
+    </div>
+
+</div>
+
+<script>
+const btc = document.getElementById("btc");
+const eth = document.getElementById("eth");
+const time = document.getElementById("time");
+
+const eventSource = new EventSource("/sse");
+
+eventSource.onmessage = ({ data }) => {
+    const res = JSON.parse(data);
+
+    btc.textContent = "$" + res.bitcoin.usd.toLocaleString();
+    eth.textContent = "$" + res.ethereum.usd.toLocaleString();
+
+    time.textContent =
+        "Last updated: " + new Date().toLocaleTimeString();
+};
+
+eventSource.onerror = () => {
+    time.textContent = "Connection lost...";
+};
+</script>
+
+</body>
+</html>
